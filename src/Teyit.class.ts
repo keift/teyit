@@ -4,16 +4,15 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { convertToJSONSchema } from './utils/ConvertToJSONSchema.util';
-import { convertToYup } from './utils/ConvertToYup.util';
+import { validate } from './utils/Engine.util';
 import { pascalCase } from './utils/PascalCase.util';
 
 import { TeyitOptionsDefault } from './defaults/TeyitOptions.default';
 
-import type { AnyObject } from './types/AnyObject.type';
 import type { JSONSchema } from './types/JSONSchema.type';
 import type { Schema } from './types/Schema.type';
 import type { TeyitOptions } from './types/TeyitOptions.type';
-import type { YupSchema } from './types/YupSchema.type';
+import type { UnknownObject } from './types/UnknownObject.type';
 
 const cleaned_types_dirs = new Set<string>();
 
@@ -47,10 +46,8 @@ export class Teyit {
     }
   }
 
-  public validate(schema: Schema, properties: AnyObject): Promise<AnyObject> {
-    const yup_schema = this.convertToYup(schema);
-
-    return yup_schema.validate(properties, this.options.validate_options);
+  public validate(schema: Schema, properties: UnknownObject): Promise<UnknownObject> {
+    return validate(schema, properties, this.options);
   }
 
   public async declare(schema: Schema, name: string): Promise<void> {
@@ -70,10 +67,6 @@ export class Teyit {
     await fs.mkdir(types_dir, { recursive: true });
 
     await fs.writeFile(path.join(types_dir, `${name}.d.ts`), type);
-  }
-
-  public convertToYup(schema: Schema): YupSchema {
-    return convertToYup(schema, this.options);
   }
 
   public convertToJSONSchema(schema: Schema): JSONSchema {

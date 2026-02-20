@@ -1,6 +1,6 @@
 import { Teyit, Patterns, type Schema } from '../src/main';
 
-const Yupp = new Teyit();
+const teyit = new Teyit();
 
 const schema: Schema = {
   display_name: {
@@ -85,7 +85,7 @@ const example_json_schema = {
   }
 };
 
-const conversion = Yupp.convertToJSONSchema(schema);
+const conversion = teyit.convertToJSONSchema(schema);
 
 if (JSON.stringify(conversion) !== JSON.stringify(example_json_schema)) throw new Error('❌ Error');
 

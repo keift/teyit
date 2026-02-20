@@ -1,6 +1,6 @@
 import { Teyit, type Schema } from '../../src/main';
 
-const Yupp = new Teyit();
+const teyit = new Teyit();
 
 const schema: Schema = {
   field: {
@@ -18,7 +18,7 @@ const correct_properties = [
 
 for (let i = 0; i < correct_properties.length; i++) {
   try {
-    const fields = await Yupp.validate(schema, correct_properties[i]);
+    const fields = await teyit.validate(schema, correct_properties[i]);
 
     if (fields.field !== 'test') throw new Error();
 

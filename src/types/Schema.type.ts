@@ -6,7 +6,7 @@ export type String = {
   pattern?: string;
   min?: number;
   max?: number;
-  trim?: boolean;
+  trim?: boolean; // Default: true
   lowercase?: boolean;
   uppercase?: boolean;
   default?: string | null;
@@ -55,16 +55,20 @@ export type Array = {
   type: 'array';
   min?: number;
   max?: number;
-  items: Types;
+  items: Type;
   default?: unknown[] | null;
   nullable: boolean;
   required: boolean;
 };
 
-export type Type = String | Number | Boolean | Date | Object | Array;
+export type TypeSingle = String | Number | Boolean | Date | Object | Array;
 
-export type Union = [Type, Type, ...Type[]];
+export type TypeUnion = [TypeSingle, TypeSingle, ...TypeSingle[]];
 
-export type Types = Type | Union;
+export type Type = TypeSingle | TypeUnion;
 
-export type Schema = Record<string, Types>;
+export type SchemaSingle = Record<string, Type>;
+
+export type SchemaUnion = [SchemaSingle, SchemaSingle, ...SchemaSingle[]];
+
+export type Schema = SchemaSingle | SchemaUnion;

@@ -12,7 +12,7 @@ export const TeyitOptionsDefault: TeyitOptions = {
     string: {
       type: 'Field {path} must be a string',
       enum: 'Field {path} must be one of the allowed values',
-      pattern: 'Field {path} must match the required pattern {pattern}',
+      pattern: 'Field {path} must match the required pattern',
       min: 'Field {path} must be at least {min} character{plural_suffix}',
       max: 'Field {path} must be at most {max} character{plural_suffix}'
     },

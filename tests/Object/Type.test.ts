@@ -1,6 +1,6 @@
 import { Teyit, type Schema, type ValidationError } from '../../src/main';
 
-const Yupp = new Teyit();
+const teyit = new Teyit();
 
 const schema: Schema = {
   field: {
@@ -35,7 +35,7 @@ const faulty_properties = [
 
 for (let i = 0; i < correct_properties.length; i++) {
   try {
-    await Yupp.validate(schema, correct_properties[i]);
+    await teyit.validate(schema, correct_properties[i]);
 
     console.log(`✅ Success ${String(i + 1)}/${String(correct_properties.length)} [CORRECT_PROPERTIES]`);
   } catch {
@@ -45,7 +45,7 @@ for (let i = 0; i < correct_properties.length; i++) {
 
 for (let i = 0; i < faulty_properties.length; i++) {
   try {
-    await Yupp.validate(schema, faulty_properties[i]);
+    await teyit.validate(schema, faulty_properties[i]);
 
     throw new Error(`❌ Error ${String(i + 1)}/${String(faulty_properties.length)} [FAULTY_PROPERTIES]`);
   } catch (error) {

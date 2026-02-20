@@ -108,7 +108,6 @@ teyit
 │   │
 │   ├── validate(schema, properties)
 │   ├── declare(schema, name)
-│   ├── convertToYup(schema)
 │   └── convertToJSONSchema(schema)
 │
 ├── Patterns
@@ -149,7 +148,7 @@ Teyit schema builder.
 > Example:
 >
 > ```typescript
-> const Yupp = new Teyit();
+> const teyit = new Teyit();
 > ```
 
 ### Methods
@@ -222,7 +221,7 @@ Validate the properties with your Teyit schema.
 > };
 >
 > try {
->   await Yupp.validate(schema, properties);
+>   await teyit.validate(schema, properties);
 >   /*
 >     {
 >       display_name: "Fırat",
@@ -256,12 +255,12 @@ Declare your Teyit schema for TypeScript.
 > ```typescript
 > import type { User } from './generated/teyit/types/User';
 >
-> await Yupp.declare(schema, 'User');
+> await teyit.declare(schema, 'User');
 >
 > let fields;
 >
 > try {
->   fields = (await Yupp.validate(schema, properties)) as User;
+>   fields = (await teyit.validate(schema, properties)) as User;
 >   /*
 >     interface User {
 >       display_name: string;
@@ -273,24 +272,6 @@ Declare your Teyit schema for TypeScript.
 > } catch (error) {
 >   // ...
 > }
-> ```
-
-<br/>
-
-`Teyit.convertToYup(schema)`
-
-Convert your Teyit schema into Yup schema.
-
-> | Parameter | Type     | Default | Description   |
-> | --------- | -------- | ------- | ------------- |
-> | `schema`  | [Schema] |         | Teyit schema. |
->
-> returns [YupSchema]
->
-> Example:
->
-> ```typescript
-> Yupp.convertToYup(schema);
 > ```
 
 <br/>
@@ -308,7 +289,7 @@ Convert your Teyit schema into [JSON Schema](https://json-schema.org).
 > Example:
 >
 > ```typescript
-> Yupp.convertToJSONSchema(schema);
+> teyit.convertToJSONSchema(schema);
 > /*
 >   {
 >     type: "object",

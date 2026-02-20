@@ -21,8 +21,7 @@
     "json-schema-to-typescript": "^15.0.4",
     "lodash.merge": "^4.6.2",
     "traverse": "^0.6.11",
-    "typof": "^1.0.15",
-    "yup": "^1.7.1"
+    "typof": "^1.0.15"
   },
   "devDependencies": {
     "prettier": "latest",

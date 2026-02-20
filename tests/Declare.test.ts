@@ -1,6 +1,6 @@
 import { Teyit, Patterns, type Schema } from '../src/main';
 
-const Yupp = new Teyit({ output_dir: './tests/generated/teyit' });
+const teyit = new Teyit({ output_dir: './tests/generated/teyit' });
 
 const schema: Schema = {
   display_name: {
@@ -48,6 +48,6 @@ const schema: Schema = {
   ]
 };
 
-await Yupp.declare(schema, 'User');
+await teyit.declare(schema, 'User');
 
 console.log('✅ Success');
