@@ -1,0 +1,44 @@
+{
+  "name": "teyit",
+  "version": "1.0.0",
+  "description": "Portable and simple schemas for property validation.",
+  "license": "MIT",
+  "homepage": "https://github.com/keift/teyit",
+  "bugs": "https://github.com/keift/teyit/issues",
+  "main": "./dist/main.js",
+  "module": "./dist/main.mjs",
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "tests": "bun run lint && bun test",
+    "build": "tsup",
+    "prettier": "prettier --write ./",
+    "lint": "eslint ./"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.48",
+    "@types/lodash.merge": "^4.6.9",
+    "@types/traverse": "^0.6.37",
+    "json-schema-to-typescript": "^15.0.4",
+    "lodash.merge": "^4.6.2",
+    "traverse": "^0.6.11",
+    "typof": "^1.0.15",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "prettier": "latest",
+    "rulint": "latest",
+    "tsup": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keift/teyit"
+  },
+  "keywords": [
+    "validate",
+    "validation",
+    "typecheck",
+    "yup",
+    "json-schema",
+    "openapi"
+  ]
+}
