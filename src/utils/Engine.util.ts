@@ -15,35 +15,36 @@ const formatPath = (path_array: string[]) =>
     return `${acc}.${key}`;
   }, '');
 
-const getSchema = (schema: Schema | Type, path_array: string[], current_value?: unknown): TypeSingle | undefined => {
+const getSchema = (schema: Schema | Type, path_array: string[], property?: unknown): TypeSingle | undefined => {
   if (path_array.length === 0) {
     if (Array.isArray(schema)) {
-      if (current_value === undefined) return schema[0] as TypeSingle;
+      if (property === undefined) return schema[0] as TypeSingle;
 
-      const matched = schema.find((s) => {
-        const rule = s as TypeSingle;
-        if (current_value === null) return rule.nullable;
+      const matched = schema.find((type) => {
+        const schema = type as TypeSingle;
 
-        if (rule.type === 'array') return Array.isArray(current_value);
-        if (rule.type === 'object') return typeof current_value === 'object' && !Array.isArray(current_value);
-        if (rule.type === 'date') return typeof current_value === 'string' || current_value instanceof Date;
+        if (property === null) return schema.nullable;
 
-        return typeof current_value === rule.type;
+        if (schema.type === 'date') return typeof property === 'string' || property instanceof Date;
+        if (schema.type === 'array') return Array.isArray(property);
+        if (schema.type === 'object') return typeof property === 'object' && !Array.isArray(property);
+
+        return typeof property === schema.type;
       });
 
       return (matched ?? schema[0]) as TypeSingle;
     }
 
-    if (typeof schema === 'object' && 'type' in schema) return schema as TypeSingle;
+    if (typeof schema === 'object') return schema as TypeSingle;
 
-    return undefined;
+    return;
   }
 
   const [key, ...rest_path] = path_array;
 
   if (Array.isArray(schema)) {
     for (const item of schema) {
-      const result = getSchema(item, path_array, current_value);
+      const result = getSchema(item, path_array, property);
 
       if (result !== undefined) return result;
     }
@@ -53,44 +54,32 @@ const getSchema = (schema: Schema | Type, path_array: string[], current_value?: 
 
   if (typeof schema === 'object') {
     if ('type' in schema) {
-      if (schema.type === 'object' && 'properties' in schema) {
-        return getSchema(schema.properties, path_array, current_value);
-      }
+      if (schema.type === 'object' && 'properties' in schema) return getSchema(schema.properties, path_array, property);
 
-      // Dizi ise ve items varsa
-      if (schema.type === 'array' && 'items' in schema) {
-        if (/^\d+$/.test(key)) return getSchema(schema.items, rest_path, current_value);
-      }
+      if (schema.type === 'array' && 'items' in schema) if (/^\d+$/.test(key)) return getSchema(schema.items, rest_path, property);
 
-      return undefined;
+      return;
     }
 
     const schema_record = schema as Record<string, Type>;
-    if (key in schema_record) {
-      return getSchema(schema_record[key], rest_path, current_value);
-    }
-  }
 
-  return undefined;
+    if (key in schema_record) return getSchema(schema_record[key], rest_path, property);
+  }
 };
 
-const seedMissingProperties = (current_schema: unknown, current_data: unknown): void => {
-  if (typeof current_schema !== 'object' || current_schema === null || Array.isArray(current_schema)) return;
-  if (typeof current_data !== 'object' || current_data === null || Array.isArray(current_data)) return;
+const seedMissingProperties = (schema: unknown, properties: unknown) => {
+  if (typeof schema !== 'object' || schema === null || Array.isArray(schema)) return;
+  if (typeof properties !== 'object' || properties === null || Array.isArray(properties)) return;
 
-  const schema_record = current_schema as Record<string, unknown>;
-  const data_record = current_data as Record<string, unknown>;
+  const schema_record = schema as Record<string, unknown>;
+  const properties_record = properties as Record<string, unknown>;
 
   for (const key of Object.keys(schema_record)) {
-    const rule = schema_record[key];
+    const schema = schema_record[key];
 
-    if (!(key in data_record)) {
-      data_record[key] = undefined;
-    }
+    if (!(key in properties_record)) properties_record[key] = undefined;
 
-    if (rule !== null && typeof rule === 'object' && !Array.isArray(rule) && 'type' in rule && rule.type === 'object' && 'properties' in rule && data_record[key] !== null && typeof data_record[key] === 'object' && !Array.isArray(data_record[key])) {
-      seedMissingProperties(rule.properties, data_record[key]);
-    }
+    if (typeof schema === 'object' && schema !== null && !Array.isArray(schema) && 'type' in schema && schema.type === 'object' && 'properties' in schema && typeof properties_record[key] === 'object' && properties_record[key] !== null && !Array.isArray(properties_record[key])) seedMissingProperties(schema.properties, properties_record[key]);
   }
 };
 
@@ -98,34 +87,28 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       void (async () => {
-        if (Array.isArray(schema) && schema.length > 0 && typeof schema[0] === 'object' && !('type' in schema[0])) {
+        if (Array.isArray(schema)) {
           const schema_union = schema as Record<string, Type>[];
-          let last_error: Error | null = null;
-          let is_valid = false;
 
-          for (const single_schema of schema_union) {
+          let last_error = new Error();
+          let passed = false;
+
+          for (const schema_single of schema_union) {
             try {
-              // Şemanın her bir varyantı için, objenin kopyası üzerinden test yapıyoruz
-              // (Eğer obje pass olursa orjinalini değil, başarıyla parse edilmiş kopyasını dönmeliyiz)
-              const properties_clone = JSON.parse(JSON.stringify(properties));
+              const properties_clone = JSON.parse(JSON.stringify(properties)) as UnknownObject;
 
-              // Kendi içinde recursive olarak validate'i çağırıp tekil şema gibi test ediyoruz
-              const valid_properties = await validate(single_schema as Schema, properties_clone, options);
+              const valid_properties = await validate(schema_single as Schema, properties_clone, options);
 
-              // Eğer buraya ulaştıysa, şema varyantlarından birinden BAŞARIYLA GEÇTİ demektir!
-              is_valid = true;
+              passed = true;
+
               resolve(valid_properties as UnknownObject);
-              return; // Diğer varyantları test etmeye gerek kalmadı
             } catch (error) {
-              // Hata aldıysa bu varyant uymadı demektir, hatayı sakla ve bir sonraki varyantı dene
               last_error = error instanceof Error ? error : new Error(String(error));
             }
           }
 
-          // Eğer döngü bittiğinde is_valid false ise, hiçbir union varyantına uymamış demektir.
-          if (!is_valid) {
-            reject(last_error ?? new ValidationError({ message: 'No matching schema found in union.', code: 'UNION_FAIL', parts: {} }));
-          }
+          if (!passed) reject(last_error);
+
           return;
         }
 
