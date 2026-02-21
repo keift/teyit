@@ -46,7 +46,7 @@ export class Teyit {
     }
   }
 
-  public validate(schema: Schema, properties: UnknownObject): Promise<UnknownObject> {
+  public validate(schema: Schema, properties: UnknownObject) {
     return validate(schema, properties, this.options);
   }
 

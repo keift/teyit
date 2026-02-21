@@ -10,4 +10,4 @@ const schema: Schema = {
   }
 };
 
-console.log(await teyit.validate(schema, { field: 'username', a: 1 }));
+console.log(await teyit.validate(schema, { field: 'username' }));

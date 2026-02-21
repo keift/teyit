@@ -6,10 +6,10 @@ export type String = {
   pattern?: string;
   min?: number;
   max?: number;
+  default?: string | null;
   trim?: boolean; // Default: true
   lowercase?: boolean;
   uppercase?: boolean;
-  default?: string | null;
   nullable: boolean;
   required: boolean;
 };

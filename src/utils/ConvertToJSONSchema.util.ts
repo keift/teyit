@@ -5,7 +5,7 @@ import type { Schema, SchemaSingle, SchemaUnion, Type, TypeSingle, TypeUnion } f
 import type { TeyitOptions } from '../types/TeyitOptions.type';
 
 export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
-  const typesBase = (schema: JSONSchema, key: string, config: TypeSingle) => {
+  const typeBase = (schema: JSONSchema, key: string, config: TypeSingle) => {
     if (config.nullable || config.default === null) schema = Typebox.Union([schema, Typebox.Null()]);
 
     if (!config.required) schema = Typebox.Optional(schema);
@@ -17,32 +17,32 @@ export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
     if (config.type === 'string') {
       let schema: JSONSchema = Typebox.String({ enum: config.enum, minLength: config.min, maxLength: config.max, pattern: config.pattern !== undefined ? new RegExp(config.pattern).source : undefined, trim: config.trim === false ? false : true, lowercase: config.lowercase, uppercase: config.lowercase, default: config.default });
 
-      schema = typesBase(schema, key, config);
+      schema = typeBase(schema, key, config);
 
       return schema;
     } else if (config.type === 'number') {
-      let exclusive_minimum;
+      let minimum = config.min;
       let exclusive_maximum;
 
-      if (config.positive === true && config.min === undefined) exclusive_minimum = 0;
+      if (config.positive === true && config.min === undefined) minimum = 0;
 
       if (config.negative === true && config.max === undefined) exclusive_maximum = 0;
 
-      let schema: JSONSchema = config.integer === true ? Typebox.Integer({ enum: config.enum, minimum: config.min, maximum: config.max, exclusiveMinimum: exclusive_minimum, exclusiveMaximum: exclusive_maximum, positive: config.positive, negative: config.negative, default: config.default }) : Typebox.Number({ enum: config.enum, minimum: config.min, maximum: config.max, exclusiveMinimum: exclusive_minimum, exclusiveMaximum: exclusive_maximum, positive: config.positive, negative: config.negative, default: config.default });
+      let schema: JSONSchema = config.integer === true ? Typebox.Integer({ enum: config.enum, minimum, maximum: config.max, exclusiveMaximum: exclusive_maximum, default: config.default }) : Typebox.Number({ enum: config.enum, minimum, maximum: config.max, exclusiveMaximum: exclusive_maximum, default: config.default });
 
-      schema = typesBase(schema, key, config);
+      schema = typeBase(schema, key, config);
 
       return schema;
     } else if (config.type === 'boolean') {
       let schema: JSONSchema = Typebox.Boolean({ default: config.default });
 
-      schema = typesBase(schema, key, config);
+      schema = typeBase(schema, key, config);
 
       return schema;
     } else if (config.type === 'date') {
       let schema: JSONSchema = Typebox.String({ format: 'date-time', formatMinimum: config.min !== undefined ? new Date(config.min).toISOString() : undefined, formatMaximum: config.max !== undefined ? new Date(config.max).toISOString() : undefined, default: config.default });
 
-      schema = typesBase(schema, key, config);
+      schema = typeBase(schema, key, config);
 
       return schema;
     } else if (config.type === 'object') {
@@ -66,14 +66,14 @@ export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
         schema = Typebox.Object(nested_properties, { default: config.default, additionalProperties: !(options.validate_options?.strip_unknown ?? false) });
       }
 
-      schema = typesBase(schema, key, config);
+      schema = typeBase(schema, key, config);
 
       return schema;
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (config.type === 'array') {
       let schema: JSONSchema = Typebox.Array(buildType(key, config.items), { minItems: config.min, maxItems: config.max, default: config.default });
 
-      schema = typesBase(schema, key, config);
+      schema = typeBase(schema, key, config);
 
       return schema;
     } else throw new Error(`Invalid schema type for ${key}`);
