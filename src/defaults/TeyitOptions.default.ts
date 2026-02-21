@@ -48,8 +48,9 @@ export const TeyitOptionsDefault: TeyitOptions = {
     }
   },
 
-  validate_options: {
+  validation: {
     abort_early: false,
+    sort_keys: true,
     strip_unknown: true
   }
 };

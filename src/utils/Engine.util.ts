@@ -1,5 +1,6 @@
 import traverse from 'traverse';
 import { typof, date } from 'typof';
+import sortkeys from 'sort-keys';
 
 import type { AnyObject } from '../types/AnyObject.type';
 import type { Schema, Type, TypeSingle } from '../types/Schema.type';
@@ -118,6 +119,14 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
 
           seedMissingProperties(schema, properties_clone);
 
+          const collected_errors: { message: string; parts: Record<string, string> }[] = [];
+
+          const reportError = (error: { message: string; parts: Record<string, string> }) => {
+            if (options.validation?.abort_early === false) {
+              collected_errors.push(error);
+            } else throw new ValidationError({ errors: [error] });
+          };
+
           // eslint-disable-next-line no-restricted-syntax
           traverse(properties_clone).forEach(function (property) {
             if (this.isRoot) return;
@@ -126,13 +135,13 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
             const equivalent = getSchema(schema, this.path, property);
 
             if (!equivalent) {
-              if (options.validate_options?.strip_unknown === true) this.delete();
+              if (options.validation?.strip_unknown === true) this.delete();
 
               return;
             }
 
             if (property === null) {
-              if (!equivalent.nullable && equivalent.default !== null) throw new ValidationError({ message: (options.error_messages?.base?.nullable ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (!equivalent.nullable && equivalent.default !== null) reportError({ message: (options.error_messages?.base?.nullable ?? '').replaceAll('{path}', path), parts: { path } });
 
               return;
             }
@@ -140,87 +149,93 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
             if (property === undefined) {
               if (equivalent.default !== undefined) {
                 this.update(equivalent.default);
-
                 property = equivalent.default;
-              } else if (equivalent.required) throw new ValidationError({ message: (options.error_messages?.base?.required ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              } else if (equivalent.required) {
+                reportError({ message: (options.error_messages?.base?.required ?? '').replaceAll('{path}', path), parts: { path } });
+
+                return;
+              } else return;
             }
 
             if (equivalent.type === 'string') {
-              if (typeof property !== 'string') throw new ValidationError({ message: (options.error_messages?.string?.type ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (typeof property !== 'string') {
+                reportError({ message: (options.error_messages?.string?.type ?? '').replaceAll('{path}', path), parts: { path } });
+
+                return;
+              }
 
               if (equivalent.trim !== false) this.update(property.trim());
-
               if (equivalent.lowercase === true) this.update(property.toLowerCase());
-
               if (equivalent.uppercase === true) this.update(property.toUpperCase());
 
               if (
                 equivalent.enum !== undefined &&
                 !equivalent.enum
                   .map((item) => {
-                    if (equivalent.trim !== false) item = item.trim();
-                    if (equivalent.lowercase === true) item = item.toLowerCase();
-                    if (equivalent.uppercase === true) item = item.toUpperCase();
+                    let mappedItem = item;
+                    if (equivalent.trim !== false) mappedItem = mappedItem.trim();
+                    if (equivalent.lowercase === true) mappedItem = mappedItem.toLowerCase();
+                    if (equivalent.uppercase === true) mappedItem = mappedItem.toUpperCase();
 
-                    return item;
+                    return mappedItem;
                   })
                   .includes(property)
               )
-                throw new ValidationError({ message: (options.error_messages?.string?.enum ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+                reportError({ message: (options.error_messages?.string?.enum ?? '').replaceAll('{path}', path), parts: { path } });
 
               if (equivalent.pattern !== undefined && !new RegExp(equivalent.pattern).test(property)) {
                 const pattern = equivalent.pattern ? new RegExp(equivalent.pattern).source : '';
 
-                throw new ValidationError({ message: (options.error_messages?.string?.pattern ?? '').replaceAll('{path}', path).replaceAll('{pattern}', pattern), code: '', parts: { path, pattern } });
+                reportError({ message: (options.error_messages?.string?.pattern ?? '').replaceAll('{path}', path).replaceAll('{pattern}', pattern), parts: { path, pattern } });
               }
 
               if (equivalent.min !== undefined && property.length < equivalent.min) {
                 const part_min = String(equivalent.min);
                 const plural_suffix = equivalent.min > 1 ? 's' : '';
 
-                throw new ValidationError({
-                  message: (options.error_messages?.string?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min).replaceAll('{plural_suffix}', plural_suffix),
-                  code: '',
-                  parts: { path, min: part_min, plural_suffix }
-                });
+                reportError({ message: (options.error_messages?.string?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min).replaceAll('{plural_suffix}', plural_suffix), parts: { path, min: part_min, plural_suffix } });
               }
 
               if (equivalent.max !== undefined && property.length > equivalent.max) {
                 const part_max = String(equivalent.max);
                 const plural_suffix = equivalent.max > 1 ? 's' : '';
 
-                throw new ValidationError({
-                  message: (options.error_messages?.string?.max ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max).replaceAll('{plural_suffix}', plural_suffix),
-                  code: '',
-                  parts: { path, max: part_max, plural_suffix }
-                });
+                reportError({ message: (options.error_messages?.string?.max ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max).replaceAll('{plural_suffix}', plural_suffix), parts: { path, max: part_max, plural_suffix } });
               }
             } else if (equivalent.type === 'number') {
-              if (typeof property !== 'number') throw new ValidationError({ message: (options.error_messages?.number?.type ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (typeof property !== 'number') {
+                reportError({ message: (options.error_messages?.number?.type ?? '').replaceAll('{path}', path), parts: { path } });
 
-              if (equivalent.enum !== undefined && !equivalent.enum.includes(property)) throw new ValidationError({ message: (options.error_messages?.number?.enum ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+                return;
+              }
+
+              if (equivalent.enum !== undefined && !equivalent.enum.includes(property)) reportError({ message: (options.error_messages?.number?.enum ?? '').replaceAll('{path}', path), parts: { path } });
 
               if (equivalent.min !== undefined && property < equivalent.min) {
                 const part_min = String(equivalent.min);
 
-                throw new ValidationError({ message: (options.error_messages?.number?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min), code: '', parts: { path, min: part_min } });
+                reportError({ message: (options.error_messages?.number?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min), parts: { path, min: part_min } });
               }
 
               if (equivalent.max !== undefined && property > equivalent.max) {
                 const part_max = String(equivalent.max);
 
-                throw new ValidationError({ message: (options.error_messages?.number?.max ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max), code: '', parts: { path, max: part_max } });
+                reportError({ message: (options.error_messages?.number?.max ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max), parts: { path, max: part_max } });
               }
 
-              if (equivalent.integer === true && !Number.isInteger(property)) throw new ValidationError({ message: (options.error_messages?.number?.integer ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (equivalent.integer === true && !Number.isInteger(property)) reportError({ message: (options.error_messages?.number?.integer ?? '').replaceAll('{path}', path), parts: { path } });
 
-              if (equivalent.positive === true && property < 0) throw new ValidationError({ message: (options.error_messages?.number?.positive ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (equivalent.positive === true && property < 0) reportError({ message: (options.error_messages?.number?.positive ?? '').replaceAll('{path}', path), parts: { path } });
 
-              if (equivalent.negative === true && property >= 0) throw new ValidationError({ message: (options.error_messages?.number?.negative ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (equivalent.negative === true && property >= 0) reportError({ message: (options.error_messages?.number?.negative ?? '').replaceAll('{path}', path), parts: { path } });
             } else if (equivalent.type === 'boolean') {
-              if (typeof property !== 'boolean') throw new ValidationError({ message: (options.error_messages?.boolean?.type ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (typeof property !== 'boolean') reportError({ message: (options.error_messages?.boolean?.type ?? '').replaceAll('{path}', path), parts: { path } });
             } else if (equivalent.type === 'date') {
-              if (typeof property !== 'string' || typof(property)[1] !== 'date') throw new ValidationError({ message: (options.error_messages?.number?.type ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (typeof property !== 'string' || typof(property)[1] !== 'date') {
+                reportError({ message: (options.error_messages?.number?.type ?? '').replaceAll('{path}', path), parts: { path } });
+
+                return;
+              }
 
               const converted = date(property);
 
@@ -232,7 +247,7 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
                 if ((converted instanceof Date ? converted : new Date()).getTime() < min_date.getTime()) {
                   const part_min = equivalent.min;
 
-                  throw new ValidationError({ message: (options.error_messages?.date?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min), code: '', parts: { path, min: part_min } });
+                  reportError({ message: (options.error_messages?.date?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min), parts: { path, min: part_min } });
                 }
               }
 
@@ -242,31 +257,37 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
                 if ((converted instanceof Date ? converted : new Date()).getTime() > max_date.getTime()) {
                   const part_max = equivalent.max;
 
-                  throw new ValidationError({ message: (options.error_messages?.date?.min ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max), code: '', parts: { path, max: part_max } });
+                  reportError({ message: (options.error_messages?.date?.min ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max), parts: { path, max: part_max } });
                 }
               }
             } else if (equivalent.type === 'object') {
-              if (typeof property !== 'object' || property === null || Array.isArray(property)) throw new ValidationError({ message: (options.error_messages?.object?.type ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (typeof property !== 'object' || property === null || Array.isArray(property)) reportError({ message: (options.error_messages?.object?.type ?? '').replaceAll('{path}', path), parts: { path } });
 
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             } else if (equivalent.type === 'array') {
-              if (!Array.isArray(property)) throw new ValidationError({ message: (options.error_messages?.array?.type ?? '').replaceAll('{path}', path), code: '', parts: { path } });
+              if (!Array.isArray(property)) {
+                reportError({ message: (options.error_messages?.array?.type ?? '').replaceAll('{path}', path), parts: { path } });
+
+                return;
+              }
 
               if (equivalent.min !== undefined && property.length < equivalent.min) {
                 const part_min = String(equivalent.min);
 
-                throw new ValidationError({ message: (options.error_messages?.array?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min), code: '', parts: { path, min: part_min } });
+                reportError({ message: (options.error_messages?.array?.min ?? '').replaceAll('{path}', path).replaceAll('{min}', part_min), parts: { path, min: part_min } });
               }
 
               if (equivalent.max !== undefined && property.length > equivalent.max) {
                 const part_max = String(equivalent.max);
 
-                throw new ValidationError({ message: (options.error_messages?.array?.max ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max), code: '', parts: { path, max: part_max } });
+                reportError({ message: (options.error_messages?.array?.max ?? '').replaceAll('{path}', path).replaceAll('{max}', part_max), parts: { path, max: part_max } });
               }
             }
           });
 
-          resolve(properties_clone);
+          if (collected_errors.length > 0) throw new ValidationError({ errors: collected_errors });
+
+          resolve(options.validation?.sort_keys === true ? sortkeys(properties_clone, { deep: true }) : properties_clone);
         } catch (error) {
           if (error instanceof Error) {
             reject(error);

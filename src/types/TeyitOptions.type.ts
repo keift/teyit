@@ -46,8 +46,9 @@ export type TeyitOptions = {
     };
   };
 
-  validate_options?: {
+  validation?: {
     abort_early?: boolean;
+    sort_keys?: boolean;
     strip_unknown?: boolean;
   };
 };

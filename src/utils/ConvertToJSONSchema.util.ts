@@ -54,7 +54,7 @@ export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
 
           for (const [nested_key, nested_config] of Object.entries(schemaSingle)) nested_properties[nested_key] = buildType(nested_key, nested_config);
 
-          return Typebox.Object(nested_properties, { additionalProperties: !(options.validate_options?.strip_unknown ?? false) });
+          return Typebox.Object(nested_properties, { additionalProperties: !(options.validation?.strip_unknown ?? false) });
         });
 
         schema = Typebox.Union(schemas, { default: config.default });
@@ -63,7 +63,7 @@ export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
 
         for (const [nested_key, nested_config] of Object.entries(config.properties)) nested_properties[nested_key] = buildType(nested_key, nested_config);
 
-        schema = Typebox.Object(nested_properties, { default: config.default, additionalProperties: !(options.validate_options?.strip_unknown ?? false) });
+        schema = Typebox.Object(nested_properties, { default: config.default, additionalProperties: !(options.validation?.strip_unknown ?? false) });
       }
 
       schema = typeBase(schema, key, config);
@@ -100,7 +100,7 @@ export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
 
     for (const [key, config] of Object.entries(schema)) properties[key] = buildType(key, config);
 
-    return Typebox.Object(properties, { additionalProperties: !(options.validate_options?.strip_unknown ?? false) });
+    return Typebox.Object(properties, { additionalProperties: !(options.validation?.strip_unknown ?? false) });
   };
 
   const buildSchemaUnion = (schema: SchemaUnion) => {

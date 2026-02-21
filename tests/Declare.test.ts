@@ -52,13 +52,10 @@ const properties = {
   display_name: 'Fırat',
   username: 'fir4tozden',
   email: 'fir4tozden@gmail.com',
-  permissions: '*',
-  a: 1
+  permissions: '*'
 };
 
-await teyit.validate(schema, properties);
-
-console.log(properties);
+console.log(await teyit.validate(schema, properties));
 
 await teyit.declare(schema, 'User');
 
