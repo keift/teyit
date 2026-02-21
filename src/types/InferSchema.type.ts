@@ -22,4 +22,6 @@ type OptionalKeys<Schema> = {
 
 type InferSchemaSingle<Schema> = Prettify<{ [Key in RequiredKeys<Schema>]: InferType<Schema[Key]> } & { [Key in OptionalKeys<Schema>]?: InferType<Schema[Key]> }>;
 
-export type InferSchema<Schema> = Schema extends readonly unknown[] ? InferSchemaSingle<Schema[number]> : InferSchemaSingle<Schema>;
+type DistributeSchema<Schema> = Schema extends unknown ? InferSchemaSingle<Schema> : never;
+
+export type InferSchema<Schema> = Schema extends readonly unknown[] ? DistributeSchema<Schema[number]> : InferSchemaSingle<Schema>;
