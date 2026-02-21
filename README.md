@@ -247,6 +247,8 @@ Validate the properties with your Teyit schema.
 >     }
 >   */
 > }
+>
+> console.log(fields.display_name); // "Fırat"
 > ```
 
 <br/>
