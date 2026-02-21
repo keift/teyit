@@ -291,41 +291,37 @@ Convert your Teyit schema into [JSON Schema](https://json-schema.org).
 > teyit.convertToJSONSchema(schema);
 > /*
 >   {
->     type: "object",
+>     additionalProperties: false,
+>     type: 'object',
+>     required: ['display_name', 'username', 'email', 'permissions'],
 >     properties: {
 >       display_name: {
->         type: "string",
->         maxLength: 32
+>         maxLength: 32,
+>         trim: true,
+>         type: 'string'
 >       },
 >       username: {
->         type: "string",
 >         minLength: 3,
 >         maxLength: 16,
->         pattern: "^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_]*$"
+>         pattern: '^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_]*$',
+>         trim: true,
+>         type: 'string'
 >       },
 >       email: {
->         type: "string",
->         pattern: "^[a-zA-Z0-9._-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$"
+>         pattern: '^[a-zA-Z0-9._-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$',
+>         trim: true,
+>         lowercase: true,
+>         uppercase: true,
+>         type: 'string'
 >       },
 >       permissions: {
 >         anyOf: [
->           {
->             type: "string",
->             enum: ["*"]
->           },
->           {
->             type: "array",
->             items: {
->               type: "string",
->               enum: ["read", "write"]
->             }
->           }
+>           { enum: ['*'], trim: true, type: 'string' },
+>           { type: 'array', items: { enum: ['read', 'write'], trim: true, type: 'string' } }
 >         ]
 >       }
->     },
->     required: ["display_name", "username", "email", "permissions"],
->     additionalProperties: false
->   };
+>     }
+>   }
 > */
 > ```
 
