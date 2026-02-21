@@ -10,6 +10,7 @@ import { pascalCase } from './utils/PascalCase.util';
 import { TeyitOptionsDefault } from './defaults/TeyitOptions.default';
 
 import type { AnyObject } from './types/AnyObject.type';
+import type { InferSchema } from './main';
 import type { JSONSchema } from './types/JSONSchema.type';
 import type { Schema } from './types/Schema.type';
 import type { TeyitOptions } from './types/TeyitOptions.type';
@@ -46,7 +47,7 @@ export class Teyit {
     }
   }
 
-  public validate(schema: Schema, properties: AnyObject): Promise<AnyObject> {
+  public validate<const _Schema extends Schema>(schema: _Schema, properties: AnyObject): Promise<InferSchema<_Schema>> {
     return validate(schema, properties, this.options);
   }
 

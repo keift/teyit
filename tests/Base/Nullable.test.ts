@@ -2,7 +2,7 @@ import { Teyit, type Schema, type ValidationError } from '../../src/main';
 
 const teyit = new Teyit();
 
-const correct_schemas: Schema[] = [
+const correct_schemas = [
   {
     field: {
       type: 'string',
@@ -18,9 +18,9 @@ const correct_schemas: Schema[] = [
       required: true
     }
   }
-];
+] as const satisfies Schema[];
 
-const faulty_schemas: Schema[] = [
+const faulty_schemas = [
   {
     field: {
       type: 'string',
@@ -28,7 +28,7 @@ const faulty_schemas: Schema[] = [
       required: true
     }
   }
-];
+] as const satisfies Schema[];
 
 const properties = {
   field: null

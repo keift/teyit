@@ -2,7 +2,7 @@ import traverse from 'traverse';
 import { typof, date } from 'typof';
 import sortkeys from 'sort-keys';
 
-import type { AnyObject } from '../types/AnyObject.type';
+import type { InferSchema } from '../main';
 import type { Schema, Type, TypeSingle } from '../types/Schema.type';
 import type { TeyitOptions } from '../types/TeyitOptions.type';
 import type { UnknownObject } from '../types/UnknownObject.type';
@@ -85,7 +85,7 @@ const seedMissingProperties = (schema: unknown, properties: unknown) => {
   }
 };
 
-export const validate = (schema: Schema, properties: UnknownObject, options: TeyitOptions): Promise<AnyObject> => {
+export const validate = <const _Schema extends Schema>(schema: _Schema, properties: UnknownObject, options: TeyitOptions): Promise<InferSchema<_Schema>> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       void (async () => {
@@ -99,11 +99,11 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
             try {
               const properties_clone = structuredClone(properties);
 
-              const valid_properties = await validate(schema_single as Schema, properties_clone, options);
+              const valid_properties = await validate(schema_single, properties_clone, options);
 
               passed = true;
 
-              resolve(valid_properties as UnknownObject);
+              resolve(valid_properties as InferSchema<_Schema>);
             } catch (error) {
               last_error = error instanceof Error ? error : new Error(String(error));
             }
@@ -172,12 +172,11 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
                 equivalent.enum !== undefined &&
                 !equivalent.enum
                   .map((item) => {
-                    let mappedItem = item;
-                    if (equivalent.trim !== false) mappedItem = mappedItem.trim();
-                    if (equivalent.lowercase === true) mappedItem = mappedItem.toLowerCase();
-                    if (equivalent.uppercase === true) mappedItem = mappedItem.toUpperCase();
+                    if (equivalent.trim !== false) item = item.trim();
+                    if (equivalent.lowercase === true) item = item.toLowerCase();
+                    if (equivalent.uppercase === true) item = item.toUpperCase();
 
-                    return mappedItem;
+                    return item;
                   })
                   .includes(property)
               )
@@ -287,7 +286,7 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
 
           if (collected_errors.length > 0) throw new ValidationError({ errors: collected_errors });
 
-          resolve(options.validation?.sort_keys === true ? sortkeys(properties_clone, { deep: true }) : properties_clone);
+          resolve((options.validation?.sort_keys === true ? sortkeys(properties_clone, { deep: true }) : properties_clone) as InferSchema<_Schema>);
         } catch (error) {
           if (error instanceof Error) {
             reject(error);

@@ -24,6 +24,7 @@
 <!---->
 
 [AnyObject]: ./src/types/AnyObject.type.ts
+[InferSchema]: ./src/types/InferSchema.type.ts
 [JSONSchema]: ./src/types/JSONSchema.type.ts
 [Schema]: ./src/types/Schema.type.ts
 [TeyitOptions]: ./src/types/TeyitOptions.type.ts
@@ -119,6 +120,7 @@ teyit
 │   └── Username
 │
 ├── type AnyObject
+├── type InferSchema
 ├── type JSONSchema
 ├── type Schema
 ├── type TeyitOptions
@@ -161,12 +163,12 @@ Validate the properties with your Teyit schema.
 > | `schema`     | [Schema]    |         | Teyit schema.              |
 > | `properties` | [AnyObject] |         | Properties to be validate. |
 >
-> returns [Promise]<[AnyObject]>
+> returns [Promise]<[InferSchema<Schema>]>
 >
 > Example:
 >
 > ```typescript
-> const schema: Schema = {
+> const schema = {
 >   display_name: {
 >     type: 'string',
 >     max: 32,
@@ -210,7 +212,7 @@ Validate the properties with your Teyit schema.
 >       required: true
 >     }
 >   ]
-> };
+> } as const satisfies Schema;
 >
 > const properties = {
 >   display_name: 'Fırat',
@@ -350,6 +352,7 @@ Convert your Teyit schema into [JSON Schema](https://json-schema.org).
 | Type              |
 | ----------------- |
 | [AnyObject]       |
+| [InferSchema]     |
 | [JSONSchema]      |
 | [Schema]          |
 | [TeyitOptions]    |

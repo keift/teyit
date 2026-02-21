@@ -2,7 +2,7 @@ import { Teyit, type Schema, type ValidationError } from '../src/main';
 
 const teyit = new Teyit({ output_dir: './tests/generated/teyit' });
 
-const schema: Schema = {
+const schema = {
   field: [
     {
       type: 'string',
@@ -15,7 +15,7 @@ const schema: Schema = {
       required: true
     }
   ]
-};
+} as const satisfies Schema;
 
 const correct_properties = [
   {

@@ -2,7 +2,7 @@ import { Teyit, Patterns, type Schema } from '../src/main';
 
 const teyit = new Teyit({ output_dir: './tests/generated/teyit' });
 
-const schema: Schema = {
+const schema = {
   display_name: {
     type: 'string',
     max: 32,
@@ -46,7 +46,7 @@ const schema: Schema = {
       required: true
     }
   ]
-};
+} as const satisfies Schema;
 
 const properties = {
   display_name: 'Fırat',

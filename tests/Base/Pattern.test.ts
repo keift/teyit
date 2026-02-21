@@ -2,14 +2,14 @@ import { Teyit, Patterns, type Schema, type ValidationError } from '../../src/ma
 
 const teyit = new Teyit();
 
-const schema: Schema = {
+const schema = {
   field: {
     type: 'string',
     pattern: Patterns.Email,
     nullable: false,
     required: true
   }
-};
+} as const satisfies Schema;
 
 const correct_properties = [
   {

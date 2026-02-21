@@ -2,14 +2,14 @@ import { Teyit, type Schema, type ValidationError } from '../../src/main';
 
 const teyit = new Teyit();
 
-const schema: Schema = {
+const schema = {
   field: {
     type: 'string',
     max: 4,
     nullable: false,
     required: true
   }
-};
+} as const satisfies Schema;
 
 const correct_properties = [
   {
