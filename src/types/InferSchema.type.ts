@@ -2,7 +2,7 @@ export type Prettify<Type> = {
   [Key in keyof Type]: Type[Key];
 } & {};
 
-type InferBaseType<Type> = Type extends { type: 'string' } ? string : Type extends { type: 'number' } ? number : Type extends { type: 'boolean' } ? boolean : Type extends { type: 'date' } ? Date : Type extends { type: 'object'; properties: infer Properties } ? InferSchema<Properties> : Type extends { type: 'array'; items: infer Items } ? InferType<Items>[] : never;
+type InferBaseType<Type> = Type extends { type: 'string' } ? (Type extends { enum: readonly (infer EnumValues)[] } ? EnumValues : string) : Type extends { type: 'number' } ? (Type extends { enum: readonly (infer EnumValues)[] } ? EnumValues : number) : Type extends { type: 'boolean' } ? boolean : Type extends { type: 'date' } ? Date : Type extends { type: 'object'; properties: infer Properties } ? InferSchema<Properties> : Type extends { type: 'array'; items: infer Items } ? InferType<Items>[] : never;
 
 type ApplyNullable<Type, Definition> = Definition extends { nullable: true } ? Type | null : Type;
 
@@ -10,7 +10,7 @@ type InferTypeSingle<Type> = Type extends unknown ? ApplyNullable<InferBaseType<
 
 type InferType<Type> = Type extends readonly unknown[] ? InferTypeSingle<Type[number]> : InferTypeSingle<Type>;
 
-type IsOptional<Type> = Type extends { required: false } ? true : Type extends readonly (infer Union)[] ? (Union extends { required: false } ? true : false) : false;
+type IsOptional<Type> = Type extends readonly [infer First, ...unknown[]] ? (First extends { required: false } ? ('default' extends keyof First ? false : true) : false) : Type extends { required: false } ? ('default' extends keyof Type ? false : true) : false;
 
 type RequiredKeys<Schema> = {
   [Key in keyof Schema]: IsOptional<Schema[Key]> extends true ? never : Key;
