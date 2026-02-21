@@ -96,7 +96,7 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
 
           for (const schema_single of schema_union) {
             try {
-              const properties_clone = JSON.parse(JSON.stringify(properties)) as UnknownObject;
+              const properties_clone = structuredClone(properties);
 
               const valid_properties = await validate(schema_single as Schema, properties_clone, options);
 
@@ -114,10 +114,12 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
         }
 
         try {
-          seedMissingProperties(schema, properties);
+          const properties_clone = structuredClone(properties);
+
+          seedMissingProperties(schema, properties_clone);
 
           // eslint-disable-next-line no-restricted-syntax
-          traverse(properties).forEach(function (property) {
+          traverse(properties_clone).forEach(function (property) {
             if (this.isRoot) return;
 
             const path = formatPath(this.path);
@@ -264,7 +266,7 @@ export const validate = (schema: Schema, properties: UnknownObject, options: Tey
             }
           });
 
-          resolve(properties);
+          resolve(properties_clone);
         } catch (error) {
           if (error instanceof Error) {
             reject(error);

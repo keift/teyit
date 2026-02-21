@@ -5,6 +5,7 @@ const teyit = new Teyit();
 const schema: Schema = {
   field: {
     type: 'string',
+    uppercase: true,
     nullable: false,
     required: true
   }
@@ -12,7 +13,7 @@ const schema: Schema = {
 
 const correct_properties = [
   {
-    field: ' test '
+    field: 'test'
   }
 ];
 
@@ -20,7 +21,7 @@ for (let i = 0; i < correct_properties.length; i++) {
   try {
     const fields = await teyit.validate(schema, correct_properties[i]);
 
-    if (fields.field !== 'test') throw new Error();
+    if (fields.field !== 'TEST') throw new Error();
 
     console.log(`✅ Success ${String(i + 1)}/${String(correct_properties.length)} [CORRECT_PROPERTIES]`);
   } catch {

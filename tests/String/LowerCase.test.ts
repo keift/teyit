@@ -5,6 +5,7 @@ const teyit = new Teyit();
 const schema: Schema = {
   field: {
     type: 'string',
+    lowercase: true,
     nullable: false,
     required: true
   }
@@ -12,7 +13,7 @@ const schema: Schema = {
 
 const correct_properties = [
   {
-    field: ' test '
+    field: 'TEST'
   }
 ];
 
