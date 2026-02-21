@@ -221,8 +221,10 @@ Validate the properties with your Teyit schema.
 >   permissions: '*'
 > };
 >
+> let fields;
+>
 > try {
->   await teyit.validate(schema, properties);
+>   fields = await teyit.validate(schema, properties);
 >   /*
 >     {
 >       display_name: "Fırat",
