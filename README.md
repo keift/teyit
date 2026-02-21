@@ -26,9 +26,9 @@
 [AnyObject]: ./src/types/AnyObject.type.ts
 [JSONSchema]: ./src/types/JSONSchema.type.ts
 [Schema]: ./src/types/Schema.type.ts
-[ValidationError]: ./src/types/ValidationError.type.ts
 [TeyitOptions]: ./src/types/TeyitOptions.type.ts
-[YupSchema]: ./src/types/YupSchema.type.ts
+[UnknownObject]: ./src/types/UnknownObject.type.ts
+[ValidationError]: ./src/types/ValidationError.type.ts
 
 <div align="center">
   <br/>
@@ -72,7 +72,6 @@ Portable and simple schemas for property validation.
 - Schemas can be declared for TypeScript
 - Schemas can be converted to [JSON Schema](https://json-schema.org). JSON Schema is OpenAPI compatible
 - Error messages are ready to be understood but can be edited if desired
-- Works with [Yup](https://npmjs.com/package/yup), stable and secure
 
 ## Installation
 
@@ -122,9 +121,9 @@ teyit
 ├── type AnyObject
 ├── type JSONSchema
 ├── type Schema
-├── type ValidationError
 ├── type TeyitOptions
-└── type YupSchema
+├── type UnknownObject
+└── type ValidationError
 ```
 
 ### Import
@@ -157,10 +156,10 @@ Teyit schema builder.
 
 Validate the properties with your Teyit schema.
 
-> | Parameter    | Type        | Default | Description                |
-> | ------------ | ----------- | ------- | -------------------------- |
-> | `schema`     | [Schema]    |         | Teyit schema.              |
-> | `properties` | [AnyObject] |         | Properties to be validate. |
+> | Parameter    | Type            | Default | Description                |
+> | ------------ | --------------- | ------- | -------------------------- |
+> | `schema`     | [Schema]        |         | Teyit schema.              |
+> | `properties` | [UnknownObject] |         | Properties to be validate. |
 >
 > returns [Promise]<[AnyObject]>
 >
@@ -233,7 +232,7 @@ Validate the properties with your Teyit schema.
 > } catch (error) {
 >   const errors = (error as ValidationError).errors;
 >
->   console.log(errors[0]); // "Field email must match the required pattern ^[a-zA-Z0-9._-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$"
+>   console.log(errors[0]); // "Field email must match the required pattern"
 > }
 > ```
 
@@ -348,9 +347,9 @@ Convert your Teyit schema into [JSON Schema](https://json-schema.org).
 | [AnyObject]       |
 | [JSONSchema]      |
 | [Schema]          |
-| [ValidationError] |
 | [TeyitOptions]    |
-| [YupSchema]       |
+| [UnknownObject]   |
+| [ValidationError] |
 
 ## Links
 

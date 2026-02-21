@@ -1,6 +1,7 @@
 import traverse from 'traverse';
 import { typof, date } from 'typof';
 
+import type { AnyObject } from '../types/AnyObject.type';
 import type { Schema, Type, TypeSingle } from '../types/Schema.type';
 import type { TeyitOptions } from '../types/TeyitOptions.type';
 import type { UnknownObject } from '../types/UnknownObject.type';
@@ -83,7 +84,7 @@ const seedMissingProperties = (schema: unknown, properties: unknown) => {
   }
 };
 
-export const validate = (schema: Schema, properties: UnknownObject, options: TeyitOptions) => {
+export const validate = (schema: Schema, properties: UnknownObject, options: TeyitOptions): Promise<AnyObject> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       void (async () => {

@@ -9,6 +9,7 @@ import { pascalCase } from './utils/PascalCase.util';
 
 import { TeyitOptionsDefault } from './defaults/TeyitOptions.default';
 
+import type { AnyObject } from './types/AnyObject.type';
 import type { JSONSchema } from './types/JSONSchema.type';
 import type { Schema } from './types/Schema.type';
 import type { TeyitOptions } from './types/TeyitOptions.type';
@@ -46,7 +47,7 @@ export class Teyit {
     }
   }
 
-  public validate(schema: Schema, properties: UnknownObject) {
+  public validate(schema: Schema, properties: UnknownObject): Promise<AnyObject> {
     return validate(schema, properties, this.options);
   }
 
