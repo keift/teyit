@@ -232,7 +232,16 @@ Validate the properties with your Teyit schema.
 > } catch (error) {
 >   const errors = (error as ValidationError).errors;
 >
->   console.log(errors[0]); // "Field email must match the required pattern"
+>   console.log(errors[0]);
+>   /*
+>     {
+>       message: "Field email must match the required pattern",
+>       parts: {
+>         path: "email"
+>       },
+>       code: "field-email-must-match-the-required-pattern",
+>     }
+>   */
 > }
 > ```
 
