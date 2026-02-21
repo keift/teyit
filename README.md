@@ -163,7 +163,7 @@ Validate the properties with your Teyit schema.
 > | `schema`     | [Schema]    |         | Teyit schema.              |
 > | `properties` | [AnyObject] |         | Properties to be validate. |
 >
-> returns [Promise]<[InferSchema]<Schema>>
+> returns [Promise]<[InferSchema]\<Schema\>>
 >
 > Example:
 >
