@@ -156,10 +156,10 @@ Teyit schema builder.
 
 Validate the properties with your Teyit schema.
 
-> | Parameter    | Type            | Default | Description                |
-> | ------------ | --------------- | ------- | -------------------------- |
-> | `schema`     | [Schema]        |         | Teyit schema.              |
-> | `properties` | [UnknownObject] |         | Properties to be validate. |
+> | Parameter    | Type        | Default | Description                |
+> | ------------ | ----------- | ------- | -------------------------- |
+> | `schema`     | [Schema]    |         | Teyit schema.              |
+> | `properties` | [AnyObject] |         | Properties to be validate. |
 >
 > returns [Promise]<[AnyObject]>
 >
