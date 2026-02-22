@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/array-type */
-
 export type String = {
   type: 'string';
   enum?: string[];
@@ -51,7 +49,7 @@ export type Object = {
   required: boolean;
 };
 
-export type Array = {
+export type _Array = {
   type: 'array';
   min?: number;
   max?: number;
@@ -61,7 +59,7 @@ export type Array = {
   required: boolean;
 };
 
-export type TypeSingle = String | Number | Boolean | Date | Object | Array;
+export type TypeSingle = String | Number | Boolean | Date | Object | _Array;
 
 export type TypeUnion = [TypeSingle, TypeSingle, ...TypeSingle[]];
 

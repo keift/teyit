@@ -20,6 +20,14 @@ const getRegex = (pattern: string) => {
 };
 
 const findMatchedType = (type_union: TypeUnion, property: unknown) => {
+  if (property === undefined) {
+    const schema_with_default = type_union.find((schema) => schema.default !== undefined);
+
+    if (schema_with_default) return schema_with_default;
+
+    return type_union[0];
+  }
+
   const matched = type_union.find((schema) => {
     if (property === null) return schema.nullable;
 
@@ -34,25 +42,35 @@ const findMatchedType = (type_union: TypeUnion, property: unknown) => {
 };
 
 const findMatchedSchema = (schema_union: SchemaUnion, properties: Record<string, unknown>) => {
-  const matched = schema_union.find((schemaRecord) => {
-    const first_key = Object.keys(schemaRecord)[0];
+  let best_match = schema_union[0];
+  let max_score = -1;
 
-    if (!first_key) return false;
+  for (const schema_record of schema_union) {
+    let score = 0;
 
-    const first_type = schemaRecord[first_key];
-    const target_type = Array.isArray(first_type) ? first_type[0] : first_type;
-    const property = properties[first_key];
+    for (const key of Object.keys(schema_record)) {
+      const property = properties[key];
+      const schema_def = schema_record[key];
+      const target_type = Array.isArray(schema_def) ? findMatchedType(schema_def, property) : schema_def;
 
-    if (property === null) return target_type.nullable;
+      if (property === null) {
+        if (target_type.nullable) {
+          score++;
+        } else score -= 2;
+      } else if (property !== undefined) {
+        if ((target_type.type === 'string' && typeof property === 'string') || (target_type.type === 'number' && typeof property === 'number') || (target_type.type === 'boolean' && typeof property === 'boolean') || (target_type.type === 'object' && typeof property === 'object' && !Array.isArray(property)) || (target_type.type === 'array' && Array.isArray(property))) {
+          score++;
+        } else score -= 2;
+      } else if (target_type.required && target_type.default === undefined) score -= 1;
+    }
 
-    if (target_type.type === 'date') return typeof property === 'string' || property instanceof Date;
-    if (target_type.type === 'array') return Array.isArray(property);
-    if (target_type.type === 'object') return typeof property === 'object' && !Array.isArray(property);
+    if (score > max_score) {
+      max_score = score;
+      best_match = schema_record;
+    }
+  }
 
-    return typeof property === target_type.type;
-  });
-
-  return matched ?? schema_union[0];
+  return best_match;
 };
 
 export const validate = async <const _Schema extends Schema>(schema: _Schema, properties: Record<string, unknown>, options: TeyitOptions): Promise<InferSchema<_Schema>> => {
@@ -82,7 +100,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
     } else throw new ValidationError({ errors: [error] });
   };
 
-  const processProperty = (equivalent: TypeSingle, property: unknown, path: string): unknown => {
+  const processProperty = async (equivalent: TypeSingle, property: unknown, path: string): Promise<unknown> => {
     if (property === undefined) {
       if (equivalent.default !== undefined) {
         return equivalent.default;
@@ -150,7 +168,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
 
       return value;
     } else if (equivalent.type === 'number') {
-      if (typeof property !== 'number') {
+      if (typeof property !== 'number' || !Number.isFinite(property)) {
         reportError({ message: (options.error_messages?.number?.type ?? '').replaceAll('{path}', path), parts: { path } });
 
         return property;
@@ -166,7 +184,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
 
       if (equivalent.positive === true && property < 0) reportError({ message: (options.error_messages?.number?.positive ?? '').replaceAll('{path}', path), parts: { path } });
 
-      if (equivalent.negative === true && property >= 0) reportError({ message: (options.error_messages?.number?.negative ?? '').replaceAll('{path}', path), parts: { path } });
+      if (equivalent.negative === true && property > 0) reportError({ message: (options.error_messages?.number?.negative ?? '').replaceAll('{path}', path), parts: { path } });
 
       return property;
     } else if (equivalent.type === 'boolean') {
@@ -220,7 +238,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
         const target_schema = Array.isArray(schema_property) ? findMatchedType(schema_property, property_record[key]) : schema_property;
 
         const next_path = path === 'root' ? key : `${path}.${key}`;
-        const property_processed = processProperty(target_schema, property_record[key], next_path);
+        const property_processed = await processProperty(target_schema, property_record[key], next_path);
 
         if (property_processed !== undefined) result_record[key] = property_processed;
       }
@@ -247,7 +265,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
         const base_path = path === 'root' ? '' : path;
         const next_path = `${base_path}[${String(i)}]`;
 
-        results_array[i] = processProperty(target_schema, property[i], next_path);
+        results_array[i] = await processProperty(target_schema, property[i], next_path);
       }
 
       return results_array;
@@ -267,7 +285,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
       const schema_property = schema_record[key];
       const target_schema = Array.isArray(schema_property) ? findMatchedType(schema_property, properties[key]) : schema_property;
 
-      const property_processed = processProperty(target_schema, properties[key], key);
+      const property_processed = await processProperty(target_schema, properties[key], key);
 
       if (property_processed !== undefined) result_record[key] = property_processed;
     }

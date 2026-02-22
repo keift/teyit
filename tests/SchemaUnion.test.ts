@@ -1,6 +1,6 @@
 import { Teyit, type Schema, type ValidationError } from '../src/main';
 
-const teyit = new Teyit({ output_dir: './tests/generated/teyit' });
+const teyit = new Teyit();
 
 const schema = [
   {
