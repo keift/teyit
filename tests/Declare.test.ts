@@ -55,7 +55,7 @@ const properties = {
   permissions: '*'
 };
 
-await teyit.validate(schema, properties);
+teyit.validate(schema, properties);
 
 await teyit.declare(schema, 'User');
 
