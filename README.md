@@ -28,7 +28,6 @@
 [JSONSchema]: ./src/types/JSONSchema.type.ts
 [Schema]: ./src/types/Schema.type.ts
 [TeyitOptions]: ./src/types/TeyitOptions.type.ts
-[UnknownObject]: ./src/types/UnknownObject.type.ts
 [ValidationError]: ./src/types/ValidationError.type.ts
 
 <div align="center">
@@ -124,7 +123,6 @@ teyit
 ├── type JSONSchema
 ├── type Schema
 ├── type TeyitOptions
-├── type UnknownObject
 └── type ValidationError
 ```
 
@@ -360,7 +358,6 @@ Convert your Teyit schema into [JSON Schema](https://json-schema.org).
 | [JSONSchema]      |
 | [Schema]          |
 | [TeyitOptions]    |
-| [UnknownObject]   |
 | [ValidationError] |
 
 ## Links

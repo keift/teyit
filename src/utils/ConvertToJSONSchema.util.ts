@@ -69,14 +69,13 @@ export const convertToJSONSchema = (schema: Schema, options: TeyitOptions) => {
       schema = typeBase(schema, key, config);
 
       return schema;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (config.type === 'array') {
+    } else {
       let schema: JSONSchema = Typebox.Array(buildType(key, config.items), { minItems: config.min, maxItems: config.max, default: config.default });
 
       schema = typeBase(schema, key, config);
 
       return schema;
-    } else throw new Error(`Invalid schema type for ${key}`);
+    }
   };
 
   const buildTypeUnion = (key: string, config: TypeUnion) => {
