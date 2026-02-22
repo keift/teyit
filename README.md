@@ -224,7 +224,7 @@ Validate the properties with your Teyit schema.
 > let fields;
 >
 > try {
->   fields = teyit.validate(schema, properties);
+>   fields = await teyit.validate(schema, properties);
 >   /*
 >     {
 >       display_name: "Fırat",
@@ -274,7 +274,7 @@ Declare your Teyit schema for TypeScript.
 > let fields;
 >
 > try {
->   fields = teyit.validate(schema, properties) as User;
+>   fields = (await teyit.validate(schema, properties)) as User;
 >   /*
 >     interface User {
 >       display_name: string;

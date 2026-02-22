@@ -85,7 +85,7 @@ const seedMissingProperties = (schema: unknown, properties: unknown) => {
   }
 };
 
-export const validate = <const _Schema extends Schema>(schema: _Schema, properties: UnknownObject, options: TeyitOptions): InferSchema<_Schema> => {
+export const validate = async <const _Schema extends Schema>(schema: _Schema, properties: UnknownObject, options: TeyitOptions): Promise<InferSchema<_Schema>> => {
   if (Array.isArray(schema)) {
     const schema_union = schema as Record<string, Type>[];
 
@@ -95,7 +95,7 @@ export const validate = <const _Schema extends Schema>(schema: _Schema, properti
       try {
         const properties_clone = structuredClone(properties);
 
-        const valid_properties = validate(schema_single, properties_clone, options);
+        const valid_properties = await validate(schema_single, properties_clone, options);
 
         return valid_properties as InferSchema<_Schema>;
       } catch (error) {
