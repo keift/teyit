@@ -17,12 +17,10 @@
   "dependencies": {
     "@sinclair/typebox": "^0.34.48",
     "@types/lodash.merge": "^4.6.9",
-    "@types/traverse": "^0.6.37",
     "json-schema-to-typescript": "^15.0.4",
     "lodash.merge": "^4.6.2",
     "slugify": "^1.6.6",
     "sort-keys": "^6.0.0",
-    "traverse": "^0.6.11",
     "typof": "^1.0.16"
   },
   "devDependencies": {
