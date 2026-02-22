@@ -159,19 +159,17 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
       if (equivalent.lowercase === true) this.update(property.toLowerCase());
       if (equivalent.uppercase === true) this.update(property.toUpperCase());
 
-      if (
-        equivalent.enum !== undefined &&
-        !equivalent.enum
-          .map((item) => {
-            if (equivalent.trim !== false) item = item.trim();
-            if (equivalent.lowercase === true) item = item.toLowerCase();
-            if (equivalent.uppercase === true) item = item.toUpperCase();
+      if (equivalent.enum !== undefined) {
+        const passed = equivalent.enum.some((item) => {
+          if (equivalent.trim !== false) item = item.trim();
+          if (equivalent.lowercase === true) item = item.toLowerCase();
+          if (equivalent.uppercase === true) item = item.toUpperCase();
 
-            return item;
-          })
-          .includes(property)
-      )
-        reportError({ message: (options.error_messages?.string?.enum ?? '').replaceAll('{path}', path), parts: { path } });
+          return item === property;
+        });
+
+        if (!passed) reportError({ message: (options.error_messages?.string?.enum ?? '').replaceAll('{path}', path), parts: { path } });
+      }
 
       if (equivalent.pattern !== undefined && !new RegExp(equivalent.pattern).test(property)) {
         const pattern = equivalent.pattern ? new RegExp(equivalent.pattern).source : '';
