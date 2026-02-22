@@ -93,7 +93,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
 
     for (const schema_single of schema_union) {
       try {
-        const properties_clone = (properties);
+        const properties_clone = properties;
 
         const valid_properties = await validate(schema_single, properties_clone, options);
 
@@ -106,7 +106,7 @@ export const validate = async <const _Schema extends Schema>(schema: _Schema, pr
     throw last_error;
   }
 
-  const properties_clone = (properties);
+  const properties_clone = properties;
 
   seedMissingProperties(schema, properties_clone);
 
