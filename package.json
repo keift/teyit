@@ -1,6 +1,6 @@
 {
   "name": "teyit",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Portable and simple schemas for property validation.",
   "license": "MIT",
   "homepage": "https://github.com/keift/teyit",
